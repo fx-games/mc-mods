@@ -79,7 +79,8 @@ public class ClimbingClaws implements ModInitializer {
 			player.drop(claws, false);
 		}
 
-		source.sendSuccess(() -> Component.literal("Gave 1 pair of " + metal + " Climbing Claws"), false);
+		source.sendSuccess(() -> Component.translatable("commands.give.success.single", 1, claws.getHoverName(),
+				player.getDisplayName()), false);
 		return 1;
 	}
 

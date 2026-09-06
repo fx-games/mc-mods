@@ -3,11 +3,12 @@
 
     python3 tools/make_textures.py
 
-The item is two 16x16 layers. `climbing_claws` is the metal, which the item model tints with
-`minecraft:dyed_color` so one texture covers iron, copper, gold and netherite — it has to stay
-near-white, because a tint multiplies and cannot brighten. `climbing_claws_grip` is the leather
-hand loop, which stays untinted. The loop over the knuckle bar is what says these are gripped in
-the hand rather than strapped to a boot.
+The item is two 16x16 layers. `climbing_claws` is the bare metal, which the item model tints with
+`minecraft:dyed_color` so one texture covers all six materials — it has to stay near-white, because
+a tint multiplies and cannot brighten. `climbing_claws_grip` carries everything that must NOT take
+the tint: the dark outline around the metal, and the leather hand loop. Keeping the outline out of
+the tinted layer is what makes the dark materials readable — multiplied by copper or obsidian, a
+grey outline turns into the same muddy colour as the metal it is supposed to separate.
 
 The claws carry no outline on purpose: at three pixels apart, an outline on both sides of each
 claw closes the gaps between them and the whole row turns to mush.
@@ -18,11 +19,20 @@ from PIL import Image
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / "src/main/resources/assets/climbingclaws"
 
-CLAWS_PALETTE = {
+OUTLINE = (58, 58, 58)
+
+METAL_PALETTE = {
     ".": None,
-    "n": (105, 105, 105),       # outline
+    "n": None,                  # outline lives in the untinted layer
     "M": (255, 255, 255),       # lit face
     "m": (200, 200, 200),       # shaded face
+}
+
+OUTLINE_PALETTE = {
+    ".": None,
+    "n": OUTLINE,
+    "M": None,
+    "m": None,
 }
 
 CLAWS = [
@@ -85,15 +95,35 @@ def draw(art, palette, tint=None):
     return image
 
 
+def claws(art, palette):
+    """Flipped so the claws point up in the inventory, matching how they sit in the hand."""
+    return draw(art, palette).transpose(Image.FLIP_TOP_BOTTOM)
+
+
+def tint_image(image, tint):
+    out = image.copy()
+    pixels = out.load()
+    for y in range(16):
+        for x in range(16):
+            r, g, b, a = pixels[x, y]
+            if a:
+                pixels[x, y] = (r * tint[0] // 255, g * tint[1] // 255, b * tint[2] // 255, a)
+    return out
+
+
 def main():
     items = OUT / "textures/item"
-    # Flipped so the claws point up in the inventory, matching how they sit in the hand.
-    draw(CLAWS, CLAWS_PALETTE).transpose(Image.FLIP_TOP_BOTTOM).save(items / "climbing_claws.png")
-    draw(GRIP, GRIP_PALETTE).transpose(Image.FLIP_TOP_BOTTOM).save(items / "climbing_claws_grip.png")
+    metal = claws(CLAWS, METAL_PALETTE)
+
+    untinted = claws(CLAWS, OUTLINE_PALETTE)
+    untinted.alpha_composite(draw(GRIP, GRIP_PALETTE).transpose(Image.FLIP_TOP_BOTTOM))
+
+    metal.save(items / "climbing_claws.png")
+    untinted.save(items / "climbing_claws_grip.png")
 
     tint = tuple((IRON_TINT >> shift) & 0xFF for shift in (16, 8, 0))
-    icon = draw(CLAWS, CLAWS_PALETTE, tint)
-    icon.alpha_composite(draw(GRIP, GRIP_PALETTE))
+    icon = tint_image(metal, tint)
+    icon.alpha_composite(untinted)
     icon.resize((128, 128), Image.NEAREST).save(OUT / "icon.png")
 
 
