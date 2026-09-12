@@ -14,9 +14,9 @@ ingots, two redstone).
 3. Right-click the opposite corner. Every empty spot in the box between them gets a shrunken
    ghost block, and every idle bot within 24 blocks joins the job.
 4. Each bot takes a ghost of its own and works it one block at a time: walk to the nearest
-   container within 12 blocks that holds the block — or to you, if there is none — carry it over,
-   place it. Each placement retires that ghost and the bot picks up the next free one. More bots
-   means more ghosts going up at once.
+   container within 24 blocks that holds the block — or to you, if no container has any — carry it
+   over, place it. Each placement retires that ghost and the bot picks up the next free one. More
+   bots means more ghosts going up at once.
 
 Bots pathfind like any mob, so they go around walls rather than through them. A bot that can't
 reach its spot for ten seconds drops off the job and hands the spot back to the others; the job
@@ -26,12 +26,15 @@ Between jobs the bots feed themselves: an idle bot walks to the nearest dropped 
 blocks and eats one. Bots on a job stay on the job.
 
 Sneak + right-click with the wand — on a block or at thin air — calls every bot in the dimension
-in: each one climbs into the air where it stands and flies to you at four times its normal speed,
+in: each one climbs into the air where it stands and flies to you at six times its normal speed,
 for ten seconds. Any outline in progress stops, since a bot on its way to you is not building:
 the ghosts vanish and carried blocks drop.
 
-Limits: 512 blocks per outline. A bot works one outline at a time. Running out of blocks cancels
-the rest.
+Run out of blocks and the job waits rather than ending: the ghosts stay up, the bots park, and
+they carry on the moment the block is within reach again — refill any container within 24 blocks,
+hold some yourself, or just press one into a bot's hand.
+
+Limits: 512 blocks per outline. A bot works one outline at a time.
 
 ## Prior art and credits
 

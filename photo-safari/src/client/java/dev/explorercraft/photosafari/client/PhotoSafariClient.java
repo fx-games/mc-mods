@@ -60,8 +60,7 @@ public class PhotoSafariClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Fires the moment the shutter is pressed, one frame before the screenshot is grabbed.
         // ponytail: close enough, the view barely moves in a frame.
-        ClientTakePictureCallback.EVENT.register(() ->
-                mode == Mode.LOOT && PhotoSafariConfig.peacefulLoot ? tryLoot() : reportSubjects());
+        ClientTakePictureCallback.EVENT.register(() -> isLootMode() ? tryLoot() : reportSubjects());
 
         ClientTickEvents.END_CLIENT_TICK.register(PhotoSafariClient::handleTick);
         LevelRenderEvents.COLLECT_SUBMITS.register(PhotoSafariClient::renderOutlines);
@@ -82,6 +81,12 @@ public class PhotoSafariClient implements ClientModInitializer {
             client.gui.hud.setOverlayMessage(Component.translatable(
                     mode == Mode.LOOT ? "text.photosafari.mode_loot" : "text.photosafari.mode_photograph"), false);
         }
+    }
+
+    /// Whether the camera is currently a loot camera: the shutter loots instead of taking a
+    /// picture, which is also why it needs no paper.
+    public static boolean isLootMode() {
+        return mode == Mode.LOOT && PhotoSafariConfig.peacefulLoot;
     }
 
     private static InteractionResult reportSubjects() {
@@ -153,7 +158,7 @@ public class PhotoSafariClient implements ClientModInitializer {
             return;
         }
 
-        boolean lootMode = mode == Mode.LOOT && PhotoSafariConfig.peacefulLoot;
+        boolean lootMode = isLootMode();
 
         double fov = minecraft.options.fov().get() * PictureTaker.getInstance().getFovModifier();
         double aspect = (double) minecraft.getWindow().getWidth() / (double) minecraft.getWindow().getHeight();
@@ -201,8 +206,7 @@ public class PhotoSafariClient implements ClientModInitializer {
     /// HUD while the viewfinder is up — which is exactly when this needs to be on screen.
     public static void renderLootIndicator(GuiGraphicsExtractor graphics) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (mode != Mode.LOOT || !PhotoSafariConfig.peacefulLoot
-                || minecraft.player == null || CameraItem.find(minecraft.player, true) == null) {
+        if (!isLootMode() || minecraft.player == null || CameraItem.find(minecraft.player, true) == null) {
             return;
         }
 

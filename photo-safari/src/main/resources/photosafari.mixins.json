@@ -10,6 +10,7 @@
     "InventoryMixin"
   ],
   "client": [
+    "client.CameraItemMixin",
     "client.CameraptureClientMixin",
     "client.AbstractContainerScreenMixin",
     "client.HudMixin",

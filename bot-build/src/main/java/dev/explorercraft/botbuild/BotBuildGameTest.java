@@ -79,6 +79,26 @@ public class BotBuildGameTest {
         });
     }
 
+    /// Running out of blocks parks the job instead of ending it: the ghosts stay up and the bots
+    /// go back to work as soon as the blocks are within reach again.
+    @GameTest(maxTicks = 600, padding = 32)
+    public void jobWaitsForBlocksAndBuildsOnWhenTheChestIsRefilled(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerPlayer player = (ServerPlayer) helper.makeMockServerPlayer(GameType.CREATIVE);
+        Container chest = fillChest(helper, new BlockPos(0, 1, 0), 0);
+        helper.setBlock(new BlockPos(6, 1, 6), Blocks.STONE);
+        BotBuild.spawnBot(level, Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(1, 1, 1))));
+
+        BotBuild.startJob(level, player, helper.absolutePos(new BlockPos(6, 1, 6)),
+                helper.absolutePos(new BlockPos(6, 1, 5)));
+
+        helper.runAfterDelay(100, () -> {
+            helper.assertBlockNotPresent(Blocks.STONE, new BlockPos(6, 1, 5));
+            chest.setItem(0, new ItemStack(Items.STONE, 1));
+        });
+        helper.succeedWhen(() -> helper.assertBlockPresent(Blocks.STONE, new BlockPos(6, 1, 5)));
+    }
+
     /// Every bot in range takes the job, and each one works a ghost of its own.
     @GameTest(maxTicks = 600, padding = 32)
     public void everyBotInRangeGetsAGhostOfItsOwn(GameTestHelper helper) {
@@ -175,7 +195,9 @@ public class BotBuildGameTest {
     private static Container fillChest(GameTestHelper helper, BlockPos relative, int stone) {
         helper.setBlock(relative, Blocks.CHEST);
         Container chest = (Container) helper.getLevel().getBlockEntity(helper.absolutePos(relative));
-        chest.setItem(0, new ItemStack(Items.STONE, stone));
+        if (stone > 0) {
+            chest.setItem(0, new ItemStack(Items.STONE, stone));
+        }
         return chest;
     }
 }

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -37,7 +38,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -60,13 +63,15 @@ public class BotBuild implements ModInitializer {
     /// Ceiling on a single outline, so a stray far-away corner can't queue a million ghosts.
     static final int MAX_BLOCKS = 512;
     /// How far from the first corner to look for a container to draw blocks from.
-    static final int CONTAINER_RANGE = 12;
+    static final int CONTAINER_RANGE = 24;
     /// How far from the build site a placed bot will answer the call.
     static final double BOT_RANGE = 24.0;
     /// How close the bot has to get before it can take or place a block.
     static final double REACH = 2.0;
+    /// Speed modifier a bot works at: half again its own walking pace.
+    static final double WORK_SPEED = 1.5;
     /// Speed modifier a recalled bot flies at — several times its own walking pace.
-    static final double RECALL_SPEED = 4.0;
+    static final double RECALL_SPEED = 6.0;
     /// How high a recalled bot climbs before it sets off towards the player.
     static final int RECALL_RISE = 8;
     /// Ticks a recall lasts: the climb, then the flight in.
@@ -77,6 +82,8 @@ public class BotBuild implements ModInitializer {
     static final double FOOD_RANGE = 10.0;
     /// Ticks a bot may spend getting nowhere before the job gives up on a spot it can't reach.
     static final int STALL_LIMIT = 200;
+    /// Ticks between two looks around for a container once the blocks have run out.
+    static final int RESCAN_TICKS = 40;
 
     public static final Identifier WAND_ID = id("build_wand");
     public static final Identifier BOT_ID = id("build_bot");
@@ -219,7 +226,7 @@ public class BotBuild implements ModInitializer {
             return;
         }
 
-        Job job = new Job(level, owner, state, item, findSource(level, first, item));
+        Job job = new Job(level, owner, state, item, first);
         bots.forEach(bot -> job.workers.add(new Worker(bot)));
         for (BlockPos pos : targets) {
             job.ghosts.put(pos, spawnGhost(level, pos, state));
@@ -252,19 +259,32 @@ public class BotBuild implements ModInitializer {
         return targets;
     }
 
-    /// Nearest container around the outline that actually holds the block, or null for "use the player".
+    /// Nearest container within {@link #CONTAINER_RANGE} of the outline that actually holds the
+    /// block, or null for "use the player". Asks the loaded chunks for the containers they already
+    /// know about rather than walking every block position in range — the range is wide enough
+    /// that a block-by-block scan would be far too much work to repeat while a job waits.
     static BlockPos findSource(ServerLevel level, BlockPos around, Item item) {
         BlockPos best = null;
-        double bestDistance = Double.MAX_VALUE;
-        for (BlockPos pos : BlockPos.betweenClosed(around.offset(-CONTAINER_RANGE, -CONTAINER_RANGE, -CONTAINER_RANGE),
-                around.offset(CONTAINER_RANGE, CONTAINER_RANGE, CONTAINER_RANGE))) {
-            if (!(level.getBlockEntity(pos) instanceof Container container) || container.countItem(item) == 0) {
-                continue;
-            }
-            double distance = pos.distSqr(around);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                best = pos.immutable();
+        double bestDistance = CONTAINER_RANGE * CONTAINER_RANGE;
+        int chunkX = SectionPos.blockToSectionCoord(around.getX());
+        int chunkZ = SectionPos.blockToSectionCoord(around.getZ());
+        int chunks = CONTAINER_RANGE / 16 + 1;
+        for (int dx = -chunks; dx <= chunks; dx++) {
+            for (int dz = -chunks; dz <= chunks; dz++) {
+                LevelChunk chunk = level.getChunkSource().getChunkNow(chunkX + dx, chunkZ + dz);
+                if (chunk == null) {
+                    continue;
+                }
+                for (Map.Entry<BlockPos, BlockEntity> entry : chunk.getBlockEntities().entrySet()) {
+                    if (!(entry.getValue() instanceof Container container) || container.countItem(item) == 0) {
+                        continue;
+                    }
+                    double distance = entry.getKey().distSqr(around);
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        best = entry.getKey().immutable();
+                    }
+                }
             }
         }
         return best;
@@ -366,7 +386,7 @@ public class BotBuild implements ModInitializer {
             return true;
         }
         if (bot.getNavigation().isDone()) {
-            bot.getNavigation().moveTo(goal.x, goal.y, goal.z, 1.0);
+            bot.getNavigation().moveTo(goal.x, goal.y, goal.z, WORK_SPEED);
         }
         bot.getLookControl().setLookAt(goal);
         return false;
@@ -389,20 +409,28 @@ public class BotBuild implements ModInitializer {
         final ServerPlayer owner;
         final BlockState state;
         final Item item;
-        final BlockPos source;
+        /// Where the containers are looked for: the corner the material was taken from.
+        final BlockPos site;
+        /// The container being drawn from, re-chosen whenever the old one runs dry.
+        BlockPos source;
+        /// Game time the next look around for a container is allowed.
+        long nextScan;
+        /// Whether the job is parked waiting on blocks, so it only says so once.
+        boolean waiting;
         final Map<BlockPos, Display.BlockDisplay> ghosts = new LinkedHashMap<>();
         final List<Worker> workers = new ArrayList<>();
 
-        Job(ServerLevel level, ServerPlayer owner, BlockState state, Item item, BlockPos source) {
+        Job(ServerLevel level, ServerPlayer owner, BlockState state, Item item, BlockPos site) {
             this.level = level;
             this.owner = owner;
             this.state = state;
             this.item = item;
-            this.source = source;
+            this.site = site;
+            this.source = findSource(level, site, item);
         }
 
-        /// One tick of work for every bot on the job. False means the job is over — finished, out
-        /// of blocks, or out of bots.
+        /// One tick of work for every bot on the job. False means the job is over — finished or
+        /// out of bots. Running out of blocks only parks it.
         boolean step() {
             workers.removeIf(worker -> !worker.bot.isAlive() || worker.bot.isRemoved());
             for (Worker worker : List.copyOf(workers)) {
@@ -417,7 +445,7 @@ public class BotBuild implements ModInitializer {
             return !ghosts.isEmpty();
         }
 
-        /// False only when the whole job is done for: the blocks ran out.
+        /// False only when the whole job is done for.
         private boolean stepWorker(Worker worker) {
             if (worker.target == null || !ghosts.containsKey(worker.target)) {
                 worker.target = nextTarget();
@@ -435,18 +463,38 @@ public class BotBuild implements ModInitializer {
                 return true;
             }
 
+            // A block pressed straight into a bot's hand is the block it carries off.
+            if (!worker.carrying && worker.bot.getMainHandItem().is(item)) {
+                worker.carrying = true;
+                worker.stalled = 0;
+            }
+
             if (!worker.carrying) {
-                Container container = container();
-                Vec3 goal = source != null && container != null
-                        ? Vec3.atCenterOf(source)
-                        : owner.position().add(0.0, 1.0, 0.0);
-                if (!moveTo(worker.bot, goal)) {
+                Container from = supply();
+                if (from == null) {
+                    // Nowhere to get the block from yet: park the bot and keep the ghosts up, so
+                    // putting the blocks within reach picks the job back up where it stopped.
+                    if (!waiting) {
+                        waiting = true;
+                        tell(owner, "Out of %s. Put some in a container nearby or in your inventory."
+                                .formatted(state.getBlock().getName().getString()));
+                    }
+                    worker.bot.getNavigation().stop();
+                    worker.stalled = 0;
                     return true;
                 }
-                Container from = container != null ? container : owner.getInventory();
+                if (waiting) {
+                    waiting = false;
+                    tell(owner, "Building again.");
+                }
+                if (!moveTo(worker.bot, from == owner.getInventory()
+                        ? owner.position().add(0.0, 1.0, 0.0)
+                        : Vec3.atCenterOf(source))) {
+                    return true;
+                }
+                // Somebody may have emptied it while the bot was on its way over.
                 if (!takeOne(from, item)) {
-                    tell(owner, "Out of %s.".formatted(state.getBlock().getName().getString()));
-                    return false;
+                    return true;
                 }
                 worker.carrying = true;
                 worker.stalled = 0;
@@ -476,6 +524,25 @@ public class BotBuild implements ModInitializer {
                     .filter(pos -> workers.stream().noneMatch(other -> pos.equals(other.target)))
                     .findFirst()
                     .orElse(null);
+        }
+
+        /// Where the next block comes from: the chosen container while it still holds the block,
+        /// the owner's own inventory otherwise, and a fresh look around when neither has any.
+        /// Null means nobody within reach has the block right now.
+        private Container supply() {
+            Container container = container();
+            if (container != null) {
+                return container;
+            }
+            if (owner.getInventory().countItem(item) > 0) {
+                return owner.getInventory();
+            }
+            if (level.getGameTime() < nextScan) {
+                return null;
+            }
+            nextScan = level.getGameTime() + RESCAN_TICKS;
+            source = findSource(level, site, item);
+            return container();
         }
 
         /// The chosen container, as long as it still exists and still has the block.

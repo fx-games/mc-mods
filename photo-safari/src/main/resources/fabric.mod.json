@@ -3,14 +3,20 @@
   "id": "photosafari",
   "version": "${version}",
   "name": "Photo Safari",
-  "description": "Photograph every living thing in the world. Adds occlusion-checked entity detection and advancement progression on top of Camerapture.",
+  "description": "Photograph every living thing in the world. Adds occlusion-checked entity detection and advancement progression on top of Camerapture (MIT, by chrrrs), whose camera ships inside this mod.",
   "authors": ["felix"],
   "license": "MIT",
   "icon": "assets/photosafari/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.explorercraft.photosafari.PhotoSafari"],
-    "client": ["dev.explorercraft.photosafari.client.PhotoSafariClient"],
+    "main": [
+      "me.chrr.camerapture.fabric.CameraptureFabric",
+      "dev.explorercraft.photosafari.PhotoSafari"
+    ],
+    "client": [
+      "me.chrr.camerapture.fabric.CameraptureClientFabric",
+      "dev.explorercraft.photosafari.client.PhotoSafariClient"
+    ],
     "fabric-datagen": ["dev.explorercraft.photosafari.PhotoSafariDataGenerator"],
     "fabric-gametest": ["dev.explorercraft.photosafari.PhotoSafariGameTest"],
     "modmenu": ["dev.explorercraft.photosafari.client.PhotoSafariModMenu"]
@@ -19,13 +25,25 @@
     "fabricloader": ">=0.19.3",
     "minecraft": "~${minecraft_version}",
     "java": ">=25",
-    "fabric-api": "*",
-    "camerapture": ">=1.10.15"
+    "fabric-api": "*"
   },
   "suggests": {
     "modmenu": "*"
   },
+  "breaks": {
+    "camerapture": "*"
+  },
+  "accessWidener": "camerapture.accesswidener",
   "mixins": [
-    "photosafari.mixins.json"
+    "photosafari.mixins.json",
+    "camerapture.mixins.json",
+    {
+      "config": "camerapture-client.mixins.json",
+      "environment": "client"
+    },
+    {
+      "config": "camerapture-fabric.mixins.json",
+      "environment": "client"
+    }
   ]
 }

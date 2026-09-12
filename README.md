@@ -6,7 +6,7 @@ project in its own folder; the scripts at the root build and publish all of them
 | Mod | Folder | What it does |
 |---|---|---|
 | [White Flag](white-flag) | `white-flag/` | Craft a white flag. Carry it in your hotbar and every hostile mob stops attacking you. |
-| [Photo Safari](photo-safari) | `photo-safari/` | Photograph every kind of living creature in the world. Turns [Camerapture](https://modrinth.com/mod/camerapture) photography into a collection game with a grouped species checklist, plus a camera loot mode that takes a mob's drops without killing it and a cooldown-free tier 2 camera. |
+| [Photo Safari](photo-safari) | `photo-safari/` | Photograph every kind of living creature in the world. Carries [Camerapture](https://github.com/chrrs/camerapture) (MIT) inside it — no separate install, and it cannot run beside it — and turns that photography into a collection game with a grouped species checklist, plus a camera loot mode that takes a mob's drops without killing it and a cooldown-free tier 2 camera. |
 | [Plush Boots](plush-boots) | `plush-boots/` | Craft plush boots. Wear them and falling stops hurting. |
 | [Glider](glider) | `glider/` | Craft a glider. Hold it as you fall and the canopy opens: you drift down slowly and steer where you like. |
 | [Miniature Rebreather](miniature-rebreather) | `miniature-rebreather/` | Craft a miniature rebreather. Wear it in the helmet slot and you never run out of air underwater. |

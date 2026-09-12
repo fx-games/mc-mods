@@ -54,6 +54,7 @@ public class FxGlobals implements ModInitializer {
 
 	/** Other Explorercraft mods' items, looked up by ID so this mod need not depend on them. */
 	private static final Identifier SATCHEL_ID = Identifier.fromNamespaceAndPath("postbote", "postbote_satchel");
+	// Photo Safari vendors Camerapture and keeps its IDs, so either mod answers this lookup.
 	private static final Identifier CAMERA_ID = Identifier.fromNamespaceAndPath("camerapture", "camera");
 	private static final Identifier ALBUM_ID = Identifier.fromNamespaceAndPath("camerapture", "album");
 	private static final Identifier WHITE_FLAG_ID = Identifier.fromNamespaceAndPath("whiteflag", "white_flag");

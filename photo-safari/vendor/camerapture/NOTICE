@@ -1,0 +1,24 @@
+Camerapture, by chrrrs — https://github.com/chrrs/camerapture
+Vendored from branch 26.2, commit 08eae6e (upstream version 1.10.15), MIT licensed; the
+upstream licence sits beside this file in LICENSE and covers everything under this directory.
+
+Photo Safari ships this code inside its own jar instead of depending on the Camerapture mod.
+Registry, asset and data IDs are untouched (camerapture:camera, camerapture:picture and the
+rest), so a world that used Camerapture keeps its photos, albums and picture frames. The flip
+side is that the two cannot run together — photosafari declares "breaks": camerapture.
+
+Changes made to the copy, all of them re-applied by ../import_camerapture.sh:
+  - NeoForge sources dropped; this is a Fabric-only copy.
+  - Tapestry (upstream's multi-loader layer) unhooked: its @FabricEntrypoint / @Implementation
+    annotations are gone, entrypoints are declared in photosafari's fabric.mod.json instead,
+    and Camerapture.PLATFORM / Camerapture.NETWORK name the Fabric implementations directly
+    rather than looking them up as services.
+  - Optional integrations dropped, since this mod does not carry their dependencies:
+    Cloth Config (and with it Camerapture's own config screen and Mod Menu entry), Jade and
+    First Person Model.
+  - The Fabric client entrypoint and client mixins moved into the client source set, which
+    this project keeps separate from main and upstream does not.
+
+Photo Safari's own changes to Camerapture's behaviour are not made in here: they live in
+photosafari's mixins (src/main/java/.../mixin, src/client/java/.../mixin/client), so this
+directory stays a plain copy that can be re-imported.

@@ -139,7 +139,7 @@ if wanted photo-safari; then
     publish photo-safari photo-safari "Photo Safari" \
     "Photograph every kind of living creature in the world. Turns Camerapture photography into a collection game." \
         '["adventure","game-mechanics"]' \
-        '[{"project_id":"9dzLWnmZ","dependency_type":"required"}]'
+        '[{"project_id":"9dzLWnmZ","dependency_type":"incompatible"}]'
 fi
 
 if wanted glider; then

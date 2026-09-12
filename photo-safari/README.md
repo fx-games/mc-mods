@@ -3,6 +3,12 @@
 A Fabric mod for Minecraft 26.2. Turns [Camerapture](https://modrinth.com/mod/camerapture) photography into a
 collection game: photograph every kind of living creature in the world.
 
+Camerapture is **not** a dependency any more — its camera, pictures, albums and picture frames are
+built into this jar (MIT, see [vendor/camerapture](vendor/camerapture)). Item and block IDs are
+unchanged, so worlds that used Camerapture keep every photo and frame they had. Do not install
+Camerapture beside this mod: the two would register the same IDs, so the loader refuses to run
+both.
+
 - Every mob that ends up **in frame and not hidden behind blocks** counts as a species on film.
 - Advancements at 1, 10, 25 and 50 species, each with an experience reward; the last one also drops loot.
 - One advancement per mob under the **Photo Safari** tab, so the advancement screen *is* the checklist:
@@ -14,7 +20,8 @@ collection game: photograph every kind of living creature in the world.
   e.g. *12 of 88 Vanilla Critters*.
 - With the viewfinder up, any framed mob whose species is **already on file** is outlined in red,
   so you can see at a glance which shot would only cost you paper.
-- Photos, picture frames and albums come from Camerapture, which is a required dependency.
+- Photos, picture frames and albums are Camerapture's, vendored into this mod rather than installed
+  beside it.
 - Alex's Mobs Continued is supported: its 88 mobs get their own checklist entries, gated behind a
   `fabric:all_mods_loaded` condition so the same jar works with or without it installed.
 - Every 10 species photographed pays out an **Eye of Ender**.
@@ -38,6 +45,8 @@ The camera outlines every mob it is currently framing — green for lootable, re
 one on cooldown — and pressing the trigger drops that mob's death loot straight into your
 inventory instead of taking a picture. The mob is not hurt, no paper is spent and nothing is saved
 to disk; you get the shutter sound, the swing and the same 3-second cooldown a real photo has.
+An empty paper slot is no obstacle either: loot mode works with no paper at all and the
+viewfinder's NO PAPER warning stays out of the way while it is on.
 
 One mob per trigger, and a mob you have just looted goes on cooldown until 99 other mobs have been
 looted after it. Loot mode grants the loot table, worn equipment and mob-specific bonus drops, and
@@ -119,6 +128,13 @@ where a tier 1 does, and one species on film does not finish its whole group.
 ## Installing
 
 1. Install Fabric Loader 0.19.4+ for Minecraft 26.2.
-2. From Modrinth, install [Fabric API](https://modrinth.com/mod/fabric-api) and
-   [Camerapture](https://modrinth.com/mod/camerapture) (both for 26.2).
+2. From Modrinth, install [Fabric API](https://modrinth.com/mod/fabric-api) for 26.2.
 3. Drop `photosafari-<version>.jar` into your `mods` folder.
+4. Remove Camerapture if you have it: this mod carries that code itself, and the loader will not
+   start with both.
+
+## Credits
+
+The camera, pictures, albums and picture frames are [Camerapture](https://github.com/chrrs/camerapture)
+by **chrrrs**, MIT-licensed, vendored under [vendor/camerapture](vendor/camerapture) with its
+licence and a note on what was changed.

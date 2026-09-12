@@ -54,14 +54,18 @@ just means a missing item, never a crash:
 | Item | From |
 |---|---|
 | Postbote satchel | `postbote` |
-| Camera + 24 paper | `camerapture` (the paper only comes with the camera) |
-| Photo album | `camerapture` |
+| Camera + 24 paper | `photosafari` (the paper only comes with the camera) |
+| Photo album | `photosafari` |
 | Compass, lodestone | vanilla |
 | White flag | `whiteflag` |
 | Climbing claws | `climbingclaws` |
 | Plush boots | `plushboots` |
 | Standard backpack | `travelersbackpack` |
 | Recipe book | this mod |
+
+The camera and album are still looked up as `camerapture:camera` and `camerapture:album`: Photo
+Safari carries Camerapture's code and keeps its IDs, so the same lookup works whichever of the two
+is installed.
 
 An attachment on the player records that the kit was handed out, so it never
 happens twice — it is persistent and survives death and rejoin. The **Recipe
