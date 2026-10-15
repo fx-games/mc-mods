@@ -1,12 +1,16 @@
 # Lift
 
 Fabric mod for Minecraft 26.2. Craft a Lift Plate; step on it and it carries you
-up. One block, no redstone, no multiblock.
+up. One block, no redstone, no multiblock. Three plates, at one, two and three
+times the speed.
 
 ## How it works
 
 - Step on a parked plate and it lifts out of the world as an entity with you
-  riding it, rising at 0.1 blocks per tick — about two blocks a second.
+  riding it, rising at 0.1 blocks per tick — about two blocks a second. The
+  Faster and Fastest plates are the same block at twice and three times that,
+  and the tier travels with the trip: the plate that comes back down is the
+  plate that went up.
 - Where it stops depends on what is beside it. With a solid block cardinally
   adjacent, the plate climbs alongside that wall and stops level with its top,
   which is the height you can step off at. In an open column it stops two blocks
@@ -24,8 +28,13 @@ up. One block, no redstone, no multiblock.
 
 ## Crafting
 
-Shapeless: redstone + any pressure plate (`#lift:pressure_plates`). Appears in
-the Redstone creative tab.
+All shapeless, all in the Redstone creative tab:
+
+| Result | Ingredients |
+| --- | --- |
+| Lift Plate | redstone + any pressure plate (`#lift:pressure_plates`) |
+| Faster Lift Plate | two Lift Plates |
+| Fastest Lift Plate | two Faster Lift Plates |
 
 ## Build
 
@@ -45,7 +54,12 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home ./gradl
 Covers every stop-height case — two blocks below a ceiling, level with an
 adjacent block, alongside a tall wall, a ceiling clamping a wall that runs too
 high, an open shaft staying within build height — plus a full ride that ends
-with the plate back where it started.
+with the plate back where it started, and one timed climb per tier.
+
+The ride tests hand `entityInside` the same reused cursor vanilla does, rather
+than a fresh position. That is not a detail: a plate that keeps the position it
+is given instead of copying it goes home to wherever the player last stood, and
+a test that passes an immutable position never sees it.
 
 ## License
 

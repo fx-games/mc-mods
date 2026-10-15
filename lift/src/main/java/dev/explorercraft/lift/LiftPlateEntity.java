@@ -1,6 +1,8 @@
 package dev.explorercraft.lift;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -8,6 +10,7 @@ import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -25,15 +28,15 @@ import net.minecraft.world.phys.AABB;
  * of the falling behaviour survives: {@link #tick()} replaces it outright.
  */
 public class LiftPlateEntity extends FallingBlockEntity {
-    /** Blocks per tick, up or down — about two blocks a second. */
-    private static final double SPEED = 0.1;
-
     /**
      * The client is only told where the plate is every few ticks, so without this it would jump
      * from one reported position to the next. Vanilla's handler spreads each update over the ticks
      * in between, the same way boats are kept smooth; {@link #tick()} drives it on the client.
      */
     private final InterpolationHandler interpolation = new InterpolationHandler(this);
+
+    /** Which plate is on this trip: what gets drawn, how fast it travels, and what goes back down. */
+    private LiftPlateBlock plate = Lift.LIFT_PLATE;
 
     private BlockPos origin;
     private int targetY;
@@ -45,17 +48,48 @@ public class LiftPlateEntity extends FallingBlockEntity {
         super(type, level);
     }
 
-    /** Hands the entity the trip it was spawned for. Origin is where the block came from. */
-    void beginTrip(BlockPos origin, int targetY) {
-        this.origin = origin;
+    /**
+     * Hands the entity the trip it was spawned for. Origin is where the block came from — copied,
+     * because it arrives from {@code entityInside} as the cursor vanilla re-points at every block
+     * it scans an entity against. Keeping that reference makes home follow the player around, so
+     * the plate comes back wherever they last stood instead of where it started.
+     */
+    void beginTrip(LiftPlateBlock plate, BlockPos origin, int targetY) {
+        this.plate = plate;
+        this.origin = origin.immutable();
         this.targetY = targetY;
-        setPos(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5);
+        moveTo(origin.getY());
+    }
+
+    /**
+     * The one thing that moves the plate. A lift runs in a shaft, so the column it was placed in is
+     * the only column it is ever in: height is the only thing a trip changes, and X and Z are read
+     * back off the origin every tick rather than carried forward, so nothing can nudge it sideways.
+     */
+    private void moveTo(double y) {
+        setPos(origin.getX() + 0.5, y, origin.getZ() + 0.5);
     }
 
     /** Vanilla's falling-block renderer draws this, which is all the rendering the plate needs. */
     @Override
     public BlockState getBlockState() {
-        return Lift.LIFT_PLATE.defaultBlockState();
+        return plate.defaultBlockState();
+    }
+
+    /**
+     * The tier has to reach the client or every plate would be drawn as the plain one. Vanilla
+     * already puts {@link #getBlockState()} into the spawn packet for the falling-block renderer,
+     * so reading it back out of that packet is the whole of the sync — no extra tracked data.
+     */
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+        plate = asPlate(Block.stateById(packet.getData()).getBlock());
+    }
+
+    /** A block that is not a plate — an unknown id, a corrupt save — falls back to the plain one. */
+    private static LiftPlateBlock asPlate(Block block) {
+        return block instanceof LiftPlateBlock liftPlate ? liftPlate : Lift.LIFT_PLATE;
     }
 
     @Override
@@ -86,8 +120,8 @@ public class LiftPlateEntity extends FallingBlockEntity {
         }
 
         if (goingHome) {
-            double next = Math.max(getY() - SPEED, origin.getY());
-            setPos(getX(), next, getZ());
+            double next = Math.max(getY() - plate.speed, origin.getY());
+            moveTo(next);
             if (next <= origin.getY() && standingRoomIsClear(serverLevel)) {
                 restoreAt(serverLevel, origin);
                 discard();
@@ -95,8 +129,8 @@ public class LiftPlateEntity extends FallingBlockEntity {
             return;
         }
 
-        double next = Math.min(getY() + SPEED, targetY);
-        setPos(getX(), next, getZ());
+        double next = Math.min(getY() + plate.speed, targetY);
+        moveTo(next);
         // At the top it simply hovers, still carrying the rider, until they step off. Putting the
         // block back here instead would strand it at the top with no way home.
     }
@@ -106,9 +140,15 @@ public class LiftPlateEntity extends FallingBlockEntity {
      * who came down with the plate is standing on it the moment it lands, and a block placed under
      * their feet is a block they are stepping on — which starts the whole trip over again, forever.
      * So the plate waits, holding them up as an entity, until they walk off.
+     *
+     * The room checked is the plate's own footprint from its top face up two blocks: the space a
+     * person standing on it takes up. A thin slab just above the plate is not enough, because a
+     * plate outruns the rider on the way down — the faster tiers descend quicker than gravity
+     * pulls — so at the moment it lands they are still a way above it, and a slab would read as
+     * empty and drop the block right back under the feet that are about to arrive on it.
      */
     private boolean standingRoomIsClear(ServerLevel level) {
-        AABB standingRoom = getBoundingBox().move(0.0, 0.1, 0.0);
+        AABB standingRoom = getBoundingBox().move(0.0, 0.0625, 0.0).expandTowards(0.0, 2.0, 0.0);
         return level.getEntities(this, standingRoom, entity -> !entity.isRemoved()).isEmpty();
     }
 
@@ -126,10 +166,10 @@ public class LiftPlateEntity extends FallingBlockEntity {
 
         BlockState existing = level.getBlockState(pos);
         if (existing.isAir() || existing.canBeReplaced()) {
-            level.setBlockAndUpdate(pos, Lift.LIFT_PLATE.defaultBlockState());
+            level.setBlockAndUpdate(pos, plate.defaultBlockState());
         } else {
             // Somewhere to put it beats losing it.
-            spawnAtLocation(level, new ItemStack(Lift.LIFT_PLATE_ITEM));
+            spawnAtLocation(level, new ItemStack(plate));
         }
         ejectPassengers();
     }
@@ -150,6 +190,7 @@ public class LiftPlateEntity extends FallingBlockEntity {
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
+        output.store("LiftPlate", BuiltInRegistries.BLOCK.byNameCodec(), plate);
         if (origin != null) {
             output.putInt("LiftOriginX", origin.getX());
             output.putInt("LiftOriginY", origin.getY());
@@ -162,6 +203,7 @@ public class LiftPlateEntity extends FallingBlockEntity {
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
+        plate = asPlate(input.read("LiftPlate", BuiltInRegistries.BLOCK.byNameCodec()).orElse(Lift.LIFT_PLATE));
         input.getInt("LiftOriginY").ifPresent(y -> {
             origin = new BlockPos(input.getIntOr("LiftOriginX", 0), y, input.getIntOr("LiftOriginZ", 0));
             targetY = input.getIntOr("LiftTargetY", y);

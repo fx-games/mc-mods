@@ -11,7 +11,9 @@
   ],
   "rewards": {
     "recipes": [
-      "lift:lift_plate"
+      "lift:lift_plate",
+      "lift:faster_lift_plate",
+      "lift:fastest_lift_plate"
     ]
   }
 }

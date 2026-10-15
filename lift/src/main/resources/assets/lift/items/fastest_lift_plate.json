@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "lift:block/fastest_lift_plate"
+  }
+}

@@ -16,7 +16,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -29,25 +28,22 @@ public class Lift implements ModInitializer {
     private static final ResourceKey<CreativeModeTab> REDSTONE_TAB =
             ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.withDefaultNamespace("redstone_blocks"));
 
-    public static final Identifier LIFT_PLATE_ID = id("lift_plate");
+    /** What the plain plate travels at, in blocks per tick — about two blocks a second. */
+    public static final double BASE_SPEED = 0.1;
 
     /**
-     * Unlike a vanilla pressure plate this one keeps its collision box, so a rider stands on the
-     * plate itself while it is parked rather than on whatever is underneath.
+     * The three tiers, crafted from one another and differing only in speed. Unlike a vanilla
+     * pressure plate they keep their collision box, so a rider stands on the plate itself while it
+     * is parked rather than on whatever is underneath.
      */
-    public static final Block LIFT_PLATE = new LiftPlateBlock(BlockBehaviour.Properties.of()
-            .setId(ResourceKey.create(Registries.BLOCK, LIFT_PLATE_ID))
-            .mapColor(MapColor.STONE)
-            .forceSolidOn()
-            .strength(0.5F)
-            .pushReaction(PushReaction.DESTROY)
-            .sound(SoundType.STONE));
-
-    public static final Item LIFT_PLATE_ITEM = new BlockItem(LIFT_PLATE, new Item.Properties()
-            .setId(ResourceKey.create(Registries.ITEM, LIFT_PLATE_ID))
-            .useBlockDescriptionPrefix());
+    public static final LiftPlateBlock LIFT_PLATE = plate("lift_plate", BASE_SPEED);
+    public static final LiftPlateBlock FASTER_LIFT_PLATE = plate("faster_lift_plate", 2 * BASE_SPEED);
+    public static final LiftPlateBlock FASTEST_LIFT_PLATE = plate("fastest_lift_plate", 3 * BASE_SPEED);
 
     /**
+     * One type for all three tiers: {@link LiftPlateEntity} carries the plate it came from, so the
+     * block that goes back up is the block that came down.
+     *
      * Has to stay serializable: {@code Entity#startRiding} refuses to seat a passenger on a
      * vehicle whose type cannot be saved, so {@code noSave()} and being rideable are mutually
      * exclusive. {@link LiftPlateEntity} therefore saves its trip and resumes it on load, which is
@@ -59,14 +55,37 @@ public class Lift implements ModInitializer {
             .sized(0.98F, 0.0625F)
             .passengerAttachments(new Vec3(0.0, 0.0625, 0.0))
             .noSummon()
-            .build(ResourceKey.create(Registries.ENTITY_TYPE, LIFT_PLATE_ID));
+            .build(ResourceKey.create(Registries.ENTITY_TYPE, id("lift_plate")));
 
     @Override
     public void onInitialize() {
-        Registry.register(BuiltInRegistries.BLOCK, LIFT_PLATE_ID, LIFT_PLATE);
-        Registry.register(BuiltInRegistries.ITEM, LIFT_PLATE_ID, LIFT_PLATE_ITEM);
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, LIFT_PLATE_ID, LIFT_PLATE_ENTITY);
-        CreativeModeTabEvents.modifyOutputEvent(REDSTONE_TAB).register(output -> output.accept(LIFT_PLATE_ITEM));
+        register("lift_plate", LIFT_PLATE);
+        register("faster_lift_plate", FASTER_LIFT_PLATE);
+        register("fastest_lift_plate", FASTEST_LIFT_PLATE);
+        Registry.register(BuiltInRegistries.ENTITY_TYPE, id("lift_plate"), LIFT_PLATE_ENTITY);
+        CreativeModeTabEvents.modifyOutputEvent(REDSTONE_TAB).register(output -> {
+            output.accept(LIFT_PLATE);
+            output.accept(FASTER_LIFT_PLATE);
+            output.accept(FASTEST_LIFT_PLATE);
+        });
+    }
+
+    private static LiftPlateBlock plate(String path, double speed) {
+        return new LiftPlateBlock(BlockBehaviour.Properties.of()
+                .setId(ResourceKey.create(Registries.BLOCK, id(path)))
+                .mapColor(MapColor.STONE)
+                .forceSolidOn()
+                .strength(0.5F)
+                .pushReaction(PushReaction.DESTROY)
+                .sound(SoundType.STONE), speed);
+    }
+
+    /** A plate and the item that places it, which is also what the block drops and the tab shows. */
+    private static void register(String path, LiftPlateBlock block) {
+        Registry.register(BuiltInRegistries.BLOCK, id(path), block);
+        Registry.register(BuiltInRegistries.ITEM, id(path), new BlockItem(block, new Item.Properties()
+                .setId(ResourceKey.create(Registries.ITEM, id(path)))
+                .useBlockDescriptionPrefix()));
     }
 
     /**
@@ -75,7 +94,7 @@ public class Lift implements ModInitializer {
      * block out of the world and hands the trip to {@link LiftPlateEntity}, which owns it from
      * there and puts it back when the trip ends.
      */
-    static void beginAscend(ServerLevel level, BlockPos platePos, ServerPlayer player) {
+    static void beginAscend(ServerLevel level, BlockPos platePos, LiftPlateBlock block, ServerPlayer player) {
         if (player.isPassenger()) {
             return;
         }
@@ -90,7 +109,7 @@ public class Lift implements ModInitializer {
         }
 
         level.removeBlock(platePos, false);
-        plate.beginTrip(platePos, targetY);
+        plate.beginTrip(block, platePos, targetY);
         level.addFreshEntity(plate);
         player.startRiding(plate);
     }

@@ -1,3 +1,5 @@
 {
-  "block.lift.lift_plate": "Lift Plate"
+  "block.lift.lift_plate": "Lift Plate",
+  "block.lift.faster_lift_plate": "Faster Lift Plate",
+  "block.lift.fastest_lift_plate": "Fastest Lift Plate"
 }

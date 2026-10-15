@@ -15,18 +15,35 @@ import random
 from PIL import Image
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "src/main/resources/assets/lift/textures/block/lift_plate.png"
+BLOCK_TEXTURES = ROOT / "src/main/resources/assets/lift/textures/block"
 ICON_OUT = ROOT / "src/main/resources/assets/lift/icon.png"
 
 STONE_BASE = (130, 130, 130)
 STONE_NOISE = 14
 SEED = 20260830
 
-RUNE_PALETTE = {
-    ".": None,
-    "o": (86, 20, 12),      # dark outline
-    "R": (216, 45, 27),     # lit redstone red
-    "r": (168, 32, 20),     # shaded redstone red
+# One rune, three inks. The tiers are identical blocks at different speeds, so they are the same
+# art in a different colour rather than three drawings: redstone red, then amber, then arc-blue, a
+# ramp people already read as "hotter, quicker" from torches through to soul fire.
+TIERS = {
+    "lift_plate": {
+        ".": None,
+        "o": (86, 20, 12),      # dark outline
+        "R": (216, 45, 27),     # lit redstone red
+        "r": (168, 32, 20),     # shaded redstone red
+    },
+    "faster_lift_plate": {
+        ".": None,
+        "o": (92, 52, 8),
+        "R": (255, 176, 46),
+        "r": (204, 126, 24),
+    },
+    "fastest_lift_plate": {
+        ".": None,
+        "o": (12, 62, 82),
+        "R": (96, 228, 255),
+        "r": (48, 168, 204),
+    },
 }
 
 # A simple up-arrow: "ascending" is the whole point of the plate. Head and shaft both centered on
@@ -57,7 +74,7 @@ def stone_pixel(random_source):
     return tuple(max(0, min(255, channel + offset)) for channel in STONE_BASE)
 
 
-def draw_plate():
+def draw_plate(palette):
     random_source = random.Random(SEED)
     image = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
     for y in range(16):
@@ -66,7 +83,7 @@ def draw_plate():
 
     for y, row in enumerate(RUNE):
         for x, char in enumerate(row):
-            colour = RUNE_PALETTE[char]
+            colour = palette[char]
             if colour is not None:
                 image.putpixel((x, y), (*colour, 255))
 
@@ -86,12 +103,15 @@ def draw_icon(plate):
 
 
 def main():
-    plate = draw_plate()
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    plate.save(OUT)
-    print(f"wrote {OUT}")
+    BLOCK_TEXTURES.mkdir(parents=True, exist_ok=True)
+    plates = {}
+    for name, palette in TIERS.items():
+        plates[name] = draw_plate(palette)
+        out = BLOCK_TEXTURES / f"{name}.png"
+        plates[name].save(out)
+        print(f"wrote {out}")
 
-    icon = draw_icon(plate)
+    icon = draw_icon(plates["lift_plate"])
     ICON_OUT.parent.mkdir(parents=True, exist_ok=True)
     icon.save(ICON_OUT)
     print(f"wrote {ICON_OUT}")

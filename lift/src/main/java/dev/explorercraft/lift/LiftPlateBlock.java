@@ -14,8 +14,15 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 
 /** A pressure plate that carries whoever stands on it upward. See {@link Lift#beginAscend}. */
 public class LiftPlateBlock extends PressurePlateBlock {
-    public LiftPlateBlock(BlockBehaviour.Properties properties) {
+    /**
+     * Blocks per tick this plate travels, up and down alike. The only thing that separates the
+     * three tiers — everything else about them is identical.
+     */
+    public final double speed;
+
+    public LiftPlateBlock(BlockBehaviour.Properties properties, double speed) {
         super(BlockSetType.STONE, properties);
+        this.speed = speed;
     }
 
     /**
@@ -29,7 +36,7 @@ public class LiftPlateBlock extends PressurePlateBlock {
             InsideBlockEffectApplier effectApplier, boolean insideMainCollisionBox) {
         super.entityInside(state, level, pos, entity, effectApplier, insideMainCollisionBox);
         if (level instanceof ServerLevel serverLevel && entity instanceof ServerPlayer player) {
-            Lift.beginAscend(serverLevel, pos, player);
+            Lift.beginAscend(serverLevel, pos, this, player);
         }
     }
 

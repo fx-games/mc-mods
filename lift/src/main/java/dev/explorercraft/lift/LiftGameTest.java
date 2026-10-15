@@ -128,9 +128,13 @@ public class LiftGameTest {
         BlockPos aside = helper.absolutePos(new BlockPos(0, 2, 1));
         ServerPlayer rider = mockPlayer(helper, GameType.CREATIVE);
         rider.setPos(origin.getX() + 0.5, origin.getY() + 0.0625, origin.getZ() + 0.5);
+        // Vanilla scans the blocks an entity is inside with one cursor it keeps re-pointing, so
+        // that is what entityInside is really handed. Anything that stores the position it is
+        // given without copying it goes home to wherever the player last stood.
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
         helper.startSequence()
-                .thenExecuteFor(60, () -> simulateTick(level, rider))
+                .thenExecuteFor(60, () -> { simulateTick(level, rider, cursor); assertStaysInItsColumn(helper, origin); })
                 .thenExecute(() -> {
                     if (!(rider.getVehicle() instanceof LiftPlateEntity plate)) {
                         throw helper.assertionException("stepping on should have put the rider aboard the plate");
@@ -141,7 +145,7 @@ public class LiftGameTest {
                     }
                     rider.stopRiding(); // what pressing shift does
                 })
-                .thenExecuteFor(60, () -> simulateTick(level, rider))
+                .thenExecuteFor(60, () -> { simulateTick(level, rider, cursor); assertStaysInItsColumn(helper, origin); })
                 .thenExecute(() -> {
                     if (rider.getY() < origin.getY()) {
                         throw helper.assertionException("the rider fell through the plate to y=%.2f".formatted(rider.getY()));
@@ -152,21 +156,89 @@ public class LiftGameTest {
                     }
                     rider.setPos(aside.getX() + 0.5, aside.getY(), aside.getZ() + 0.5); // step off
                 })
-                .thenExecuteFor(20, () -> simulateTick(level, rider))
+                .thenExecuteFor(20, () -> { simulateTick(level, rider, cursor); assertStaysInItsColumn(helper, origin); })
                 .thenExecute(() -> {
-                    if (!findPlates(helper, origin).equals(List.of(origin))) {
+                    if (!findPlates(helper).equals(List.of(origin))) {
                         throw helper.assertionException("expected the one plate back at %s, found %s"
-                                .formatted(origin, findPlates(helper, origin)));
+                                .formatted(origin, findPlates(helper)));
                     }
-                    if (!level.getEntitiesOfClass(LiftPlateEntity.class, new AABB(origin).inflate(16.0)).isEmpty()) {
+                    if (!helper.getEntities(Lift.LIFT_PLATE_ENTITY).isEmpty()) {
                         throw helper.assertionException("the travelling plate should be gone once the block is back");
                     }
                 })
                 .thenSucceed();
     }
 
+    /// Two and three times the base plate's speed, measured the only way that matters: how long the
+    /// same two-block climb takes. The speed has to come off the plate that started the trip, so a
+    /// plate that ignores its own tier — or an entity that keeps a constant — shows up here.
+    @GameTest(maxTicks = 200)
+    public void thePlainPlateClimbsTwoBlocksInTwentyTicks(GameTestHelper helper) {
+        timeAClimb(helper, Lift.LIFT_PLATE, 20);
+    }
+
+    @GameTest(maxTicks = 200)
+    public void aFasterPlateClimbsTwiceAsQuickly(GameTestHelper helper) {
+        timeAClimb(helper, Lift.FASTER_LIFT_PLATE, 10);
+    }
+
+    @GameTest(maxTicks = 200)
+    public void aFastestPlateClimbsThreeTimesAsQuickly(GameTestHelper helper) {
+        timeAClimb(helper, Lift.FASTEST_LIFT_PLATE, 7); // two blocks at 0.3 lands on the 7th tick
+    }
+
+    /// Rides the given plate up a two-block wall and checks both ends of the trip: the tick it
+    /// arrives on, and that the block that comes home is the same tier that left.
+    private static void timeAClimb(GameTestHelper helper, LiftPlateBlock plate, int expectedTicks) {
+        ServerLevel level = helper.getLevel();
+        helper.setBlock(new BlockPos(1, 1, 1), Blocks.STONE);
+        helper.setBlock(new BlockPos(1, 2, 1), plate);
+        helper.setBlock(new BlockPos(2, 2, 1), Blocks.STONE);
+        helper.setBlock(new BlockPos(2, 3, 1), Blocks.STONE);
+        helper.setBlock(new BlockPos(0, 1, 1), Blocks.STONE); // somewhere to step off onto
+
+        BlockPos origin = helper.absolutePos(new BlockPos(1, 2, 1));
+        BlockPos aside = helper.absolutePos(new BlockPos(0, 2, 1));
+        ServerPlayer rider = mockPlayer(helper, GameType.CREATIVE);
+        rider.setPos(origin.getX() + 0.5, origin.getY() + 0.0625, origin.getZ() + 0.5);
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
+        int[] ticks = {0};
+        int[] arrivedOn = {0};
+        helper.startSequence()
+                .thenExecuteFor(60, () -> {
+                    simulateTick(level, rider, cursor);
+                    ticks[0]++;
+                    if (arrivedOn[0] == 0 && rider.getVehicle() instanceof LiftPlateEntity riding
+                            && riding.getY() >= origin.getY() + 2 - 1.0E-6) {
+                        arrivedOn[0] = ticks[0];
+                    }
+                })
+                .thenExecute(() -> {
+                    // The first tick is the step-on that starts the trip, and the plate's own first
+                    // move lands a tick either side of it depending on entity order.
+                    int travelled = arrivedOn[0] - 1;
+                    if (arrivedOn[0] == 0 || Math.abs(travelled - expectedTicks) > 1) {
+                        throw helper.assertionException("expected the climb to take about %d ticks, took %s"
+                                .formatted(expectedTicks, arrivedOn[0] == 0 ? "longer than the ride" : travelled));
+                    }
+                    rider.stopRiding();
+                })
+                .thenExecuteFor(40, () -> simulateTick(level, rider, cursor))
+                .thenExecute(() -> rider.setPos(aside.getX() + 0.5, aside.getY(), aside.getZ() + 0.5))
+                .thenExecuteFor(40, () -> simulateTick(level, rider, cursor))
+                .thenExecute(() -> {
+                    if (level.getBlockState(origin).getBlock() != plate) {
+                        throw helper.assertionException("expected the %s back at %s, found %s"
+                                .formatted(plate.getName().getString(), origin,
+                                        level.getBlockState(origin).getBlock().getName().getString()));
+                    }
+                })
+                .thenSucceed();
+    }
+
     /** Gravity, standing on things, and the step-on trigger — the parts of a player that matter here. */
-    private static void simulateTick(ServerLevel level, ServerPlayer rider) {
+    private static void simulateTick(ServerLevel level, ServerPlayer rider, BlockPos.MutableBlockPos cursor) {
         if (rider.isPassenger()) {
             return; // the vehicle owns their position
         }
@@ -184,18 +256,27 @@ public class LiftGameTest {
         }
         rider.setPos(rider.getX(), y, rider.getZ());
 
-        BlockPos feet = BlockPos.containing(rider.position());
-        BlockState state = level.getBlockState(feet);
-        if (state.getBlock() == Lift.LIFT_PLATE) {
-            ((LiftPlateBlock) Lift.LIFT_PLATE).entityInside(state, level, feet, rider,
-                    InsideBlockEffectApplier.NOOP, true);
+        cursor.set(rider.getX(), rider.getY(), rider.getZ());
+        BlockState state = level.getBlockState(cursor);
+        if (state.getBlock() instanceof LiftPlateBlock plate) {
+            plate.entityInside(state, level, cursor, rider, InsideBlockEffectApplier.NOOP, true);
         }
     }
 
-    private static List<BlockPos> findPlates(GameTestHelper helper, BlockPos near) {
+    /// A lift only ever travels up and down its own shaft, so any horizontal drift at all is a bug.
+    private static void assertStaysInItsColumn(GameTestHelper helper, BlockPos origin) {
+        for (LiftPlateEntity plate : helper.getEntities(Lift.LIFT_PLATE_ENTITY)) {
+            if (plate.getX() != origin.getX() + 0.5 || plate.getZ() != origin.getZ() + 0.5) {
+                throw helper.assertionException("the plate left the column it was placed in, x=%.2f z=%.2f (expected %.2f, %.2f)"
+                        .formatted(plate.getX(), plate.getZ(), origin.getX() + 0.5, origin.getZ() + 0.5));
+            }
+        }
+    }
+
+    private static List<BlockPos> findPlates(GameTestHelper helper) {
         List<BlockPos> found = new java.util.ArrayList<>();
-        BlockPos.betweenClosed(near.offset(-8, -8, -8), near.offset(8, 8, 8)).forEach(pos -> {
-            if (helper.getLevel().getBlockState(pos).getBlock() == Lift.LIFT_PLATE) {
+        BlockPos.betweenClosed(helper.getBounds()).forEach(pos -> {
+            if (helper.getLevel().getBlockState(pos).getBlock() instanceof LiftPlateBlock) {
                 found.add(pos.immutable());
             }
         });

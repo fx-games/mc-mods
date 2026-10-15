@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "lift:lift_plate",
+    "lift:lift_plate"
+  ],
+  "result": {
+    "id": "lift:faster_lift_plate"
+  }
+}
