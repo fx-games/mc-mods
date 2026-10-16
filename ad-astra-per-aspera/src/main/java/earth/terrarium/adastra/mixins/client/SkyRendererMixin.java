@@ -18,7 +18,18 @@ public abstract class SkyRendererMixin {
 
     @Inject(method = "renderSunMoonAndStars", at = @At("HEAD"), cancellable = true)
     private void adastra$renderSunMoonAndStars(PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci) {
+        if (ModSkyRenderer.starlightStars()) return;
         if (ModSkyRenderer.render(poseStack, sunAngle, rainBrightness, starBrightness)) ci.cancel();
+    }
+
+    @Inject(method = "renderSunMoonAndStars", at = @At("TAIL"))
+    private void adastra$renderBodiesOverStarlight(PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci) {
+        if (ModSkyRenderer.starlightStars()) ModSkyRenderer.renderBodies(poseStack, sunAngle, rainBrightness);
+    }
+
+    @Inject(method = {"renderSun", "renderMoon"}, at = @At("HEAD"), cancellable = true)
+    private void adastra$skipVanillaBodies(CallbackInfo ci) {
+        if (ModSkyRenderer.starlightStars()) ci.cancel();
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))

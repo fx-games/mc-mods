@@ -1,5 +1,7 @@
 package earth.terrarium.adastra.client.dimension;
 
+import net.fabricmc.loader.api.FabricLoader;
+import earth.terrarium.adastra.api.planets.Planet;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.BlendFunction;
@@ -118,7 +120,26 @@ public final class ModSkyRenderer {
 
         float stars = renderer.starBrightness().orElse(starBrightness * rainBrightness);
         if (stars > 0 && renderer.stars() > 0) renderStars(poseStack, renderer, stars);
+        renderBodies(poseStack, renderer, sunAngle, alpha);
+        return true;
+    }
 
+    /**
+     * Earth orbit with Starlight installed: vanilla keeps rendering so Starlight's real sky replaces
+     * vanilla's stars; we only skip vanilla's sun and moon and draw our bodies on top afterwards.
+     */
+    public static boolean starlightStars() {
+        ClientLevel level = Minecraft.getInstance().level;
+        return level != null && level.dimension() == Planet.EARTH_ORBIT && current() != null
+            && FabricLoader.getInstance().isModLoaded("starlight");
+    }
+
+    public static void renderBodies(PoseStack poseStack, float sunAngle, float rainBrightness) {
+        PlanetRenderer renderer = current();
+        if (renderer != null) renderBodies(poseStack, renderer, sunAngle, renderer.renderInRain() ? 1 : rainBrightness);
+    }
+
+    private static void renderBodies(PoseStack poseStack, PlanetRenderer renderer, float sunAngle, float alpha) {
         float timeOfDay = sunAngle * Mth.RAD_TO_DEG;
         for (SkyRenderable renderable : renderer.skyRenderables()) {
             Vec3 globalRotation = switch (renderable.movementType()) {
@@ -142,7 +163,6 @@ public final class ModSkyRenderer {
             }
             poseStack.popPose();
         }
-        return true;
     }
 
     private static void renderQuad(PoseStack poseStack, RenderPipeline pipeline, Identifier texture, float scale, Vector4f color) {

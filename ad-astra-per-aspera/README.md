@@ -20,7 +20,8 @@ Install it on both client and server. Needs Fabric API; ResourcefulLib and Resou
 ## Works with Starlight
 
 On the Overworld, [Starlight](../starlight) draws the night sky as usual. In the Ad Astra
-dimensions this mod draws the planet's own sky, and Starlight's stars are not shown there.
+dimensions this mod draws the planet's own sky, and Starlight's stars are not shown there, except
+in Earth orbit: there Starlight's real constellations fill the sky behind the Earth and the Sun.
 
 ## Porting notes
 
