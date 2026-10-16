@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.explorercraft.starlight.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "AbstractClientPlayerMixin",
+    "MouseHandlerMixin",
+    "SkyRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

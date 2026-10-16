@@ -22,6 +22,7 @@ project in its own folder; the scripts at the root build and publish all of them
 | [Immersive Aircraft](immersive-aircraft) | `immersive-aircraft/` | Aeroplanes, airships, biplanes and gyrodynes. Port of Luke100000's mod — **work in progress**, see its README for what is and isn't done. |
 | [Grappling Hook](grappling-hook) | `grappling-hook/` | Craft a grappling hook, swing from the rope, and bolt on motor, rocket, ender, magnet and double-hook upgrades at a smithing table. Port of Yyon's mod via weaversworkshop's Skybound fork. |
 | [Craft Tracker](craft-tracker) | `craft-tracker/` | A shopping list on the HUD. Point at any item in a container, press a key, and track how many you still need. Point at a recipe in the recipe book and it follows the whole crafting chain down to the raw materials. Client side only. |
+| [Starlight](starlight) | `starlight/` | The night sky over Kirchzarten in the Black Forest: real constellations in blocky vanilla-style stars, turning with the date and the hour, Polaris clearly marked. Look through a spyglass and the figures and names fade in; scroll to zoom it from 2× to 50×. Client side only. |
 
 ## Building
 
@@ -78,6 +79,7 @@ are craftable or in a creative tab, which is enough to test them.
 | Seamless Crafting | `/seamlesscrafting` | Prints the nearby radius, container count and item kinds in range |
 | Fireproof Suit | `/fireproofsuit [give\|status]` | Gives the full suit; prints fire protection, burning time and whether on fire |
 | Postbote | `/postbote [give\|status\|teleport]` | Gives a satchel; prints the active delivery's destination and reward; teleports within 10 blocks of it |
+| Starlight | `/starlight [status]`, `/starlight date <yyyy-mm-dd\|today>` | Prints date, sidereal time and Polaris's altitude; shows another date's sky. Client command, no permission needed |
 
 The `status` subcommands read back the exact values their mod acts on, which is usually faster than
 guessing why an effect did not fire. Each one is covered by a game test, so a command that stops
@@ -127,4 +129,5 @@ lift/                    Lift
 pistol-silencer/         Pistol & Silencer
 immersive-aircraft/      Immersive Aircraft
 craft-tracker/           Craft Tracker
+starlight/               Starlight
 ```

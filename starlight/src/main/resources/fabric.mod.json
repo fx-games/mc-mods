@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "starlight",
+  "version": "${version}",
+  "name": "Starlight",
+  "description": "The night sky as it stands over Kirchzarten in the Black Forest: real constellations, turning with the date and the hour. Look through a spyglass and their figures appear.",
+  "authors": [
+    "felix"
+  ],
+  "contributors": [
+    "Olaf Frohn (d3-celestial star and constellation data, BSD-3-Clause)"
+  ],
+  "license": "MIT",
+  "icon": "assets/starlight/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.explorercraft.starlight.StarlightClient"
+    ],
+    "fabric-gametest": [
+      "dev.explorercraft.starlight.StarlightGameTest"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "starlight.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

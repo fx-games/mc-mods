@@ -172,3 +172,9 @@ if wanted fx-globals; then
         '["game-mechanics"]' \
         '[{"project_id":"mOgUt4GM","dependency_type":"optional"}]'
 fi
+
+if wanted starlight; then
+    publish starlight explorercraft-starlight "Starlight" \
+        "The real night sky over Kirchzarten: constellations in vanilla-style stars, turning with the date. Look through a spyglass to see their figures." \
+        '["decoration","utility"]'
+fi
