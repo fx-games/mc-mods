@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:brown_wool",
+    "|": "ad_astra:steel_rod"
+  },
+  "pattern": [
+    "|##",
+    "|##",
+    "|  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:brown_flag"
+  }
+}

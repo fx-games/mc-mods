@@ -1,0 +1,131 @@
+package earth.terrarium.adastra.common.blockentities.base;
+
+import earth.terrarium.adastra.AdAstra;
+import earth.terrarium.adastra.common.blocks.base.BasicEntityBlock;
+import earth.terrarium.adastra.common.blocks.base.MachineBlock;
+import earth.terrarium.adastra.common.registry.ModDataManagers;
+import earth.terrarium.adastra.common.storage.EnergyProvider;
+import earth.terrarium.adastra.common.storage.SimpleValueStorage;
+import earth.terrarium.adastra.common.storage.SimpleFluidStorage;
+import earth.terrarium.adastra.common.storage.FluidProvider;
+import earth.terrarium.adastra.common.storage.FluidStorageData;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
+
+public abstract class MachineBlockEntity extends BlockEntity implements TickableBlockEntity {
+
+    private boolean initialized;
+
+    public MachineBlockEntity(BlockPos pos, BlockState state) {
+        this(((BasicEntityBlock) state.getBlock()).entity(state), pos, state);
+    }
+
+    public MachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    @Override
+    public void firstTick(Level level, BlockPos pos, BlockState state) {
+        this.initialized = true;
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+
+        if (this instanceof EnergyProvider.BlockEntity energyProvider) {
+            var energy = energyProvider.getEnergy(null);
+            if (energy instanceof SimpleValueStorage valueStorage) {
+                output.putLong("energy", valueStorage.getStoredAmount());
+            }
+        }
+
+        if (this instanceof FluidProvider.BlockEntity fluidProvider) {
+            var fluids = fluidProvider.getFluids(null);
+            if (fluids instanceof SimpleFluidStorage fluidStorage) {
+                output.store("fluids", FluidStorageData.CODEC, fluidStorage.createSnapshot());
+            }
+        }
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+
+        if (this instanceof EnergyProvider.BlockEntity energyProvider) {
+            var energy = energyProvider.getEnergy(null);
+            if (energy instanceof SimpleValueStorage valueStorage) {
+                input.getLong("energy").ifPresent(valueStorage::readSnapshot);
+            }
+        }
+
+        if (this instanceof FluidProvider.BlockEntity fluidProvider) {
+            var fluids = fluidProvider.getFluids(null);
+            if (fluids instanceof SimpleFluidStorage fluidStorage) {
+                input.read("fluids", FluidStorageData.CODEC).ifPresent(fluidStorage::readSnapshot);
+            }
+        }
+    }
+
+    @Override
+    public void clientTick(ClientLevel level, long time, BlockState state, BlockPos pos) {
+        if (this instanceof EnergyProvider.BlockEntity energyProvider && energyProvider.getEnergy(null) instanceof SimpleValueStorage valueStorage) {
+            valueStorage.readSnapshot(ModDataManagers.VALUE_CONTENT.get(this));
+        }
+        if (this instanceof FluidProvider.BlockEntity fluidProvider && fluidProvider.getFluids(null) instanceof SimpleFluidStorage fluidStorage) {
+            fluidStorage.readSnapshot(ModDataManagers.FLUID_CONTENTS.get(this));
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return this.initialized;
+    }
+
+    @Override
+    public void sync() {
+        level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+    }
+
+    // level getter that's specifically not null so avoid the annoying warning
+    @SuppressWarnings("DataFlowIssue")
+    @NotNull
+    public Level level() {
+        return super.getLevel();
+    }
+
+    public boolean isLit() {
+        return this.getBlockState().getValue(MachineBlock.LIT);
+    }
+
+    public void setLit(boolean lit) {
+        this.level().setBlock(this.worldPosition, this.getBlockState().setValue(MachineBlock.LIT, lit), 3);
+    }
+
+    public boolean isRedstonePowered() {
+        return this.getBlockState().getValue(MachineBlock.POWERED);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+}

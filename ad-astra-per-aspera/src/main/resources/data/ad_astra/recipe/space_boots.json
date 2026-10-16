@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "W": "#minecraft:wool"
+  },
+  "pattern": [
+    "W W",
+    "# #"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:space_boots"
+  }
+}

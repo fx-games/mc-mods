@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "ad_astra:mercury_stone",
+  "result": {
+    "count": 1,
+    "id": "ad_astra:chiseled_mercury_stone_bricks"
+  }
+}

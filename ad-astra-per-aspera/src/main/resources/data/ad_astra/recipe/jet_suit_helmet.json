@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:calorite_plates",
+    "G": "minecraft:tinted_glass",
+    "N": "ad_astra:netherite_space_helmet"
+  },
+  "pattern": [
+    "#N#",
+    "#G#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:jet_suit_helmet"
+  }
+}

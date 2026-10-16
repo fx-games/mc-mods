@@ -1,0 +1,10 @@
+{
+  "type": "ad_astra:compressing",
+  "cookingtime": 100,
+  "energy": 20,
+  "ingredient": "#ad_astra:ostrum_ingots",
+  "result": {
+    "count": 1,
+    "id": "ad_astra:ostrum_plate"
+  }
+}

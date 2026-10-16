@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "D": "minecraft:diamond_block",
+    "E": "ad_astra:etrionic_capacitor"
+  },
+  "pattern": [
+    "EDE",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:gravity_normalizer"
+  }
+}

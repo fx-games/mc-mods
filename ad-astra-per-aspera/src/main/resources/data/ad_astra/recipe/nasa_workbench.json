@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "B": "#ad_astra:steel_blocks",
+    "C": "minecraft:crafting_table",
+    "T": "minecraft:redstone_torch",
+    "|": "#ad_astra:iron_rods"
+  },
+  "pattern": [
+    "|#|",
+    "TCT",
+    "#B#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:nasa_workbench"
+  }
+}

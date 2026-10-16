@@ -1,0 +1,13 @@
+{
+  "type": "ad_astra:refining",
+  "cookingtime": 1,
+  "energy": 30,
+  "input": {
+    "tag": "ad_astra:oil",
+    "amount": 5
+  },
+  "result": {
+    "amount": 5,
+    "id": "ad_astra:fuel"
+  }
+}

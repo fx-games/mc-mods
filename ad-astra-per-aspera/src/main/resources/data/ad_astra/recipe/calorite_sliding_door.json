@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:calorite_plates",
+    "B": "#ad_astra:calorite_blocks",
+    "P": "minecraft:glass_pane"
+  },
+  "pattern": [
+    "###",
+    "PBP",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:calorite_sliding_door"
+  }
+}

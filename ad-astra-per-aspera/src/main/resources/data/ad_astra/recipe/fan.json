@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "|": "ad_astra:steel_rod"
+  },
+  "pattern": [
+    "# #",
+    " | ",
+    "# #"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:fan"
+  }
+}

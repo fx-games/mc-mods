@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "G": "ad_astra:gas_tank",
+    "H": "minecraft:hopper",
+    "S": "#ad_astra:steel_plates"
+  },
+  "pattern": [
+    "S#S",
+    "SGS",
+    "#H#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:water_pump"
+  }
+}

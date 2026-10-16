@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:calorite_plates",
+    "|": "ad_astra:steel_rod"
+  },
+  "pattern": [
+    "###",
+    "#|#",
+    "###"
+  ],
+  "result": {
+    "count": 64,
+    "id": "ad_astra:calorite_plateblock"
+  }
+}

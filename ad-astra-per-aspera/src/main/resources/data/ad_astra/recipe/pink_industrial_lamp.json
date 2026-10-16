@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:pink_dye",
+    "G": "minecraft:glowstone_dust",
+    "I": "#ad_astra:steel_ingots"
+  },
+  "pattern": [
+    "GGG",
+    "I#I"
+  ],
+  "result": {
+    "count": 4,
+    "id": "ad_astra:pink_industrial_lamp"
+  }
+}

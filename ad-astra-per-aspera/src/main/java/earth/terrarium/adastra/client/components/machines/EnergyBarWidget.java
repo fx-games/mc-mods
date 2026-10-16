@@ -1,0 +1,54 @@
+package earth.terrarium.adastra.client.components.machines;
+
+import earth.terrarium.adastra.client.components.base.TickableWidget;
+import earth.terrarium.adastra.client.utils.GuiUtils;
+import earth.terrarium.adastra.common.menus.configuration.EnergyConfiguration;
+import earth.terrarium.adastra.common.utils.TooltipUtils;
+import earth.terrarium.adastra.common.storage.ValueStorage;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.CommonComponents;
+
+import java.time.Duration;
+
+public class EnergyBarWidget extends ConfigurationWidget implements TickableWidget {
+
+    protected final ValueStorage container;
+    protected long lastStoredEnergy;
+    protected long difference;
+
+    public EnergyBarWidget(EnergyConfiguration configuration) {
+        super(configuration, GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT);
+        this.container = configuration.container();
+    }
+
+    @Override
+    public void tick() {
+        this.difference = this.container.getStoredAmount() - this.lastStoredEnergy;
+        this.lastStoredEnergy = this.container.getStoredAmount();
+    }
+
+    @Override
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, partialTick);
+        long capacity = this.container.getCapacity();
+        long energy = this.container.getStoredAmount();
+        float ratio = energy / (float) capacity;
+        int x = this.getX();
+        int y = this.getY();
+        GuiUtils.scissor(graphics, x, y + GuiUtils.ENERGY_BAR_HEIGHT - (int) (GuiUtils.ENERGY_BAR_HEIGHT * ratio), GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, GuiUtils.ENERGY_BAR, x, y, GuiUtils.ENERGY_BAR_WIDTH, GuiUtils.ENERGY_BAR_HEIGHT);
+        graphics.disableScissor();
+
+        if (this.isHoveredOrFocused()) {
+            setTooltip(Tooltip.create(CommonComponents.joinLines(
+                TooltipUtils.getEnergyComponent(energy, capacity),
+                TooltipUtils.getEnergyDifferenceComponent(this.difference)
+//                TooltipUtils.getMaxEnergyInComponent(container.maxInsert()),
+//                TooltipUtils.getMaxEnergyOutComponent(container.maxExtract())
+            )));
+            setTooltipDelay(Duration.ofMillis(0));
+        }
+    }
+}

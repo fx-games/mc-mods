@@ -23,6 +23,7 @@ project in its own folder; the scripts at the root build and publish all of them
 | [Grappling Hook](grappling-hook) | `grappling-hook/` | Craft a grappling hook, swing from the rope, and bolt on motor, rocket, ender, magnet and double-hook upgrades at a smithing table. Port of Yyon's mod via weaversworkshop's Skybound fork. |
 | [Craft Tracker](craft-tracker) | `craft-tracker/` | A shopping list on the HUD. Point at any item in a container, press a key, and track how many you still need. Point at a recipe in the recipe book and it follows the whole crafting chain down to the raw materials. Client side only. |
 | [Starlight](starlight) | `starlight/` | The night sky over Kirchzarten in the Black Forest: real constellations in blocky vanilla-style stars, turning with the date and the hour, Polaris clearly marked. Look through a spyglass and the figures and names fade in; scroll to zoom it from 2× to 50×. Client side only. |
+| [Ad Astra Per Aspera](ad-astra-per-aspera) | `ad-astra-per-aspera/` | Rockets, space stations and planets: fly to the Moon, Mars, Venus, Mercury and Glacio, survive without air with space suits and oxygen machines, under each planet's own sky. Port of Terrarium's Ad Astra, Fabric only. |
 
 ## Building
 

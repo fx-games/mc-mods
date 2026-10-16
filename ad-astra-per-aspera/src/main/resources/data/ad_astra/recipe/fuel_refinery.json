@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "B": "minecraft:bucket",
+    "F": "minecraft:furnace"
+  },
+  "pattern": [
+    "###",
+    "BFB",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:fuel_refinery"
+  }
+}

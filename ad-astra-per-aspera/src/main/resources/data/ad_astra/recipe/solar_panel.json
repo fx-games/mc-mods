@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "P": "ad_astra:photovoltaic_etrium_cell",
+    "S": "#ad_astra:steel_plates"
+  },
+  "pattern": [
+    "PPP",
+    "S#S",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:solar_panel"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "ad_astra:calorite_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "ad_astra:calorite_ingot"
+  }
+}

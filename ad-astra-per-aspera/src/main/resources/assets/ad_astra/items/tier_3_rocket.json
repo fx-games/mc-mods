@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/tier_3_rocket",
+    "model": {
+      "type": "ad_astra:tier_3_rocket"
+    }
+  }
+}

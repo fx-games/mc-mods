@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/oxygen_distributor",
+    "model": {
+      "type": "ad_astra:oxygen_distributor"
+    }
+  }
+}

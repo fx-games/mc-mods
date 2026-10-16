@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/gravity_normalizer",
+    "model": {
+      "type": "ad_astra:gravity_normalizer"
+    }
+  }
+}

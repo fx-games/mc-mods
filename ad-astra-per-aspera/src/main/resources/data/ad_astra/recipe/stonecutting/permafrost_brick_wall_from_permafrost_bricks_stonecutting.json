@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "ad_astra:permafrost_bricks",
+  "result": {
+    "count": 1,
+    "id": "ad_astra:permafrost_brick_wall"
+  }
+}

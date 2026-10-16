@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "ad_astra:iron_pillar",
+    "minecraft:yellow_dye",
+    "minecraft:black_dye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:marked_iron_pillar"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "ad_astra",
+  "version": "${version}",
+  "name": "Ad Astra Per Aspera",
+  "description": "Live long and prosper, Ad Astra Per Aspera! A Fabric 26.2 port of Ad Astra.",
+  "authors": ["Alex Nijjar"],
+  "contributors": ["CodexAdrian", "Facu", "Fizz", "MsRandom", "ThatGravyBoat", "Mrbysco"],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/ad-astra",
+    "issues": "https://github.com/memmaker/Ad-Astra/issues"
+  },
+  "license": "Terrarium License",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["earth.terrarium.adastra.fabric.AdAstraFabric::init", "earth.terrarium.adastra.AdAstra::postInit"],
+    "client": ["earth.terrarium.adastra.client.fabric.AdAstraClientFabric::init"]
+  },
+  "mixins": ["adastra-common.mixins.json", "adastra.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*",
+    "resourcefullib": "*",
+    "resourcefulconfig": "*"
+  }
+}

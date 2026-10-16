@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:calorite_plates",
+    "B": "ad_astra:calorite_block",
+    "N": "ad_astra:netherite_space_boots"
+  },
+  "pattern": [
+    " N ",
+    "# #",
+    "B B"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:jet_suit_boots"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "B": "#ad_astra:steel_blocks",
+    "G": "minecraft:glass",
+    "O": "minecraft:obsidian"
+  },
+  "pattern": [
+    "O#O",
+    "GBG",
+    "O#O"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:reinforced_door"
+  }
+}

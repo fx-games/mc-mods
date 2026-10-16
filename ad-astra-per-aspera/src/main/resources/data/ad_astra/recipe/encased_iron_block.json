@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:iron_plates",
+    "I": "#ad_astra:steel_ingots"
+  },
+  "pattern": [
+    "III",
+    "###",
+    "III"
+  ],
+  "result": {
+    "count": 64,
+    "id": "ad_astra:encased_iron_block"
+  }
+}

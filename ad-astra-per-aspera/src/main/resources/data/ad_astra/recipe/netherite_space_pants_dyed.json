@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "ad_astra:netherite_space_pants"
+  },
+  "target": "ad_astra:netherite_space_pants"
+}

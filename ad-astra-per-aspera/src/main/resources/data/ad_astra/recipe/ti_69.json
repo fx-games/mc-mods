@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:steel_plates",
+    "G": "minecraft:glass_pane",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "GGG",
+    "#R#",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:ti_69"
+  }
+}

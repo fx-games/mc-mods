@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "ad_astra:desh_ingot"
+  ],
+  "result": {
+    "count": 9,
+    "id": "ad_astra:desh_nugget"
+  }
+}

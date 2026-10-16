@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/mercury_globe",
+    "model": {
+      "type": "ad_astra:mercury_globe"
+    }
+  }
+}

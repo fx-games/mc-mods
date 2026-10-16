@@ -1,0 +1,23 @@
+{
+  "type": "ad_astra:nasa_workbench",
+  "ingredients": [
+    "ad_astra:rocket_nose_cone",
+    "#ad_astra:calorite_blocks",
+    "#ad_astra:calorite_blocks",
+    "#ad_astra:calorite_blocks",
+    "#ad_astra:calorite_blocks",
+    "#ad_astra:calorite_blocks",
+    "#ad_astra:calorite_blocks",
+    "ad_astra:rocket_fin",
+    "ad_astra:calorite_tank",
+    "ad_astra:calorite_tank",
+    "ad_astra:rocket_fin",
+    "ad_astra:rocket_fin",
+    "ad_astra:calorite_engine",
+    "ad_astra:rocket_fin"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:tier_4_rocket"
+  }
+}

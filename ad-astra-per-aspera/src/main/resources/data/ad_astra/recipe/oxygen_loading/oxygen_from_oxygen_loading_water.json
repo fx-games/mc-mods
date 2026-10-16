@@ -1,0 +1,13 @@
+{
+  "type": "ad_astra:oxygen_loading",
+  "cookingtime": 1,
+  "energy": 30,
+  "input": {
+    "tag": "minecraft:water",
+    "amount": 100
+  },
+  "result": {
+    "amount": 4,
+    "id": "ad_astra:oxygen"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "ad_astra:item/mars_globe",
+    "model": {
+      "type": "ad_astra:mars_globe"
+    }
+  }
+}

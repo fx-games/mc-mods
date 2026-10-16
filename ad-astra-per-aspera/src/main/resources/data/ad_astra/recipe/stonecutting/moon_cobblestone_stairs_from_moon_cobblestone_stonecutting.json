@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "ad_astra:moon_cobblestone",
+  "result": {
+    "count": 1,
+    "id": "ad_astra:moon_cobblestone_stairs"
+  }
+}

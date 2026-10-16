@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "D": "#ad_astra:desh_ingots"
+  },
+  "pattern": [
+    "###",
+    "#D#",
+    "###"
+  ],
+  "result": {
+    "count": 64,
+    "id": "ad_astra:desh_factory_block"
+  }
+}

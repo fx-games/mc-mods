@@ -1,0 +1,13 @@
+{
+  "type": "ad_astra:oxygen_loading",
+  "cookingtime": 1,
+  "energy": 30,
+  "input": {
+    "tag": "ad_astra:oxygen",
+    "amount": 25
+  },
+  "result": {
+    "amount": 25,
+    "id": "ad_astra:oxygen"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "D": "minecraft:diamond",
+    "G": "minecraft:blue_stained_glass"
+  },
+  "pattern": [
+    "GGG",
+    "#D#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:photovoltaic_etrium_cell"
+  }
+}

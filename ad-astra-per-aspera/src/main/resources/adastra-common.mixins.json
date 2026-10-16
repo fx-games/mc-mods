@@ -1,0 +1,53 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "earth.terrarium.adastra.mixins",
+    "compatibilityLevel": "JAVA_25",
+    "mixins": [
+        "common.EntityBelowWorldMixin",
+        "common.LivingEntityAccessor",
+        "common.LivingEntityMixin",
+        "common.MobMixin",
+        "common.PlayerMixin",
+        "common.ServerGamePacketListenerImplMixin",
+        "common.ServerLevelMixin",
+        "common.SlotAccessor",
+        "common.entities.CreeperMixin",
+        "common.entities.HoglinMixin",
+        "common.entities.ZoglinMixin",
+        "common.environment.FlowingFluidMixin",
+        "common.environment.IceBlockMixin",
+        "common.environment.WeatheringCopperFullBlockMixin",
+        "common.gravity.AbstractArrowMixin",
+        "common.gravity.BoatMixin",
+        "common.gravity.FishingHookMixin",
+        "common.gravity.GravityEntityMixin",
+        "common.gravity.ThrowableProjectileMixin",
+        "common.gravity.ThrownExperienceBottleMixin",
+        "common.gravity.ThrownPotionMixin",
+        "common.multipart.ChunkMapMixin",
+        "common.multipart.ServerLevelEntityCallbacksMixin",
+        "common.multipart.ServerLevelMixin",
+        "common.radio.LivingEntityMixin",
+        "common.radio.ServerPlayerMixin"
+    ],
+    "client": [
+        "client.AbstractContainerScreenMixin",
+        "client.ClientLevelMixin",
+        "client.CloudRendererMixin",
+        "client.EntityRendererMixin",
+        "client.HumanoidMobRendererMixin",
+        "client.HumanoidModelMixin",
+        "client.ItemInHandRendererMixin",
+        "client.PlayerRendererMixin",
+        "client.SkyRendererMixin",
+        "client.SoundEngineAccessor",
+        "client.SoundManagerAccessor",
+        "client.SoundManagerMixin",
+        "client.WeatherEffectRendererMixin",
+        "client.multipart.ClientLevelEntityCallbacksMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

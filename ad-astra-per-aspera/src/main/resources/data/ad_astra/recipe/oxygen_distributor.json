@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "#ad_astra:desh_plates",
+    "F": "ad_astra:fan",
+    "G": "ad_astra:large_gas_tank",
+    "L": "ad_astra:oxygen_loader",
+    "O": "ad_astra:oxygen_gear"
+  },
+  "pattern": [
+    "FGF",
+    "FLF",
+    "#O#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "ad_astra:oxygen_distributor"
+  }
+}

@@ -1,0 +1,9 @@
+*.log
+.claude/
+.gradle/
+build.log
+build/
+run.log
+run/
+src_tmp/
+srv.log
